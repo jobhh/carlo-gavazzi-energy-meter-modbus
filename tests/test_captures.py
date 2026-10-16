@@ -27,7 +27,7 @@ def load(unit: MockModbusUnit, capture: dict[str, Any]) -> None:
     high word. The model code a one-register read returned is kept apart, and
     answered here the same way the meter does.
     """
-    raw = {
+    raw: dict[str, dict[int, int]] = {
         space: {int(address): value for address, value in registers.items()}
         for space, registers in capture["raw"].items()
     }
@@ -36,8 +36,8 @@ def load(unit: MockModbusUnit, capture: dict[str, Any]) -> None:
     probe = capture.get("probes", {}).get("read_125_registers", {})
     for offset, word in enumerate(probe.get("words", [])):
         raw.setdefault("input", {}).setdefault(offset, word)
-    unit.load_raw(raw)
-    # Function 03h and 04h read the same data on this meter.
+    # Function 03h and 04h read the same data on this meter, and it has no
+    # coils, so both register stores get every register.
     unit.holding.update({**raw.get("input", {}), **raw.get("holding", {})})
     unit.input.update(unit.holding)
     model_code = capture["model"]["code"]
@@ -96,9 +96,7 @@ async def test_phase_powers_add_up_to_the_system_power(
 
 
 @each_capture
-async def test_voltages_agree(
-    path: Path, mock_modbus_unit: MockModbusUnit
-) -> None:
+async def test_voltages_agree(path: Path, mock_modbus_unit: MockModbusUnit) -> None:
     captured = replay(path, mock_modbus_unit)
     await captured.async_update()
     m = captured.measurements
@@ -108,6 +106,7 @@ async def test_voltages_agree(
         for n in (1, 2, 3):
             voltage = getattr(m, f"voltage_l{n}_n")
             assert voltage is not None and 180 <= voltage <= 270, (n, voltage)
+        assert m.voltage_l_n is not None
         assert close(m.voltage_l_l, m.voltage_l_n * math.sqrt(3), rel=0.05, abs_=0)
 
 

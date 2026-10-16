@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from typing import Any, Final
 
-from modbus_connection.model import Component, NumberField, int64
+from modbus_connection.model import Component, NumberField, RegisterSpace, int64
 
 MAX_REGISTERS_PER_READ: Final = 20
 """The widest read the meter is documented to answer.
@@ -34,7 +34,7 @@ class EM500Component(Component):
     since only holding registers can be written.
     """
 
-    register_space = "input"
+    register_space: RegisterSpace = "input"
     max_span = MAX_REGISTERS_PER_READ
 
 

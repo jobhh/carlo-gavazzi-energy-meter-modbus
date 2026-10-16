@@ -68,9 +68,7 @@ async def test_unknown_model_code_is_rejected(mock_modbus_unit: MockModbusUnit) 
 async def test_a_device_without_the_register_propagates_the_modbus_error(
     mock_modbus_unit: MockModbusUnit,
 ) -> None:
-    mock_modbus_unit.fail_read(
-        0x000B, IllegalDataAddressError(), register_type="input"
-    )
+    mock_modbus_unit.fail_read(0x000B, IllegalDataAddressError(), register_type="input")
 
     with pytest.raises(IllegalDataAddressError):
         await async_identify(mock_modbus_unit)

@@ -101,6 +101,26 @@ the others still refresh.
 The register map follows the *EM530/EM540 Modbus communication protocol*,
 version 1.9 (October 2024).
 
+## Checking a real meter
+
+`script/query.py` reads a meter once, prints every value, and can save the raw
+registers. It only reads; it never writes to the meter.
+
+```bash
+uv run --with aioesphomeapi script/query.py \
+    "esphome://<host>/?port_name=<name>&noise_psk=<key>" \
+    --baudrate 9600 --unit 1 --dump tests/captures/em540.json
+```
+
+The target can also be a serial port (`/dev/ttyUSB0`) or an RS485-to-TCP
+gateway (`<host> --transport tcp --port 502`). Percent-encode a `+` in the
+noise key as `%2B`. Only one Modbus master can use the bus at a time, so pause
+anything else that polls the meter while the script runs.
+
+The script also runs a few read-only probes the protocol document leaves open,
+such as whether the meter accepts reads wider than 20 registers. A dump saved
+in `tests/captures/` becomes a test case; see the README there.
+
 ## Develop
 
 ```bash

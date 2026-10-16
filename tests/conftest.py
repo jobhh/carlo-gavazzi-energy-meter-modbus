@@ -77,6 +77,7 @@ SNAPSHOT_INPUT: dict[int, int] = flatten(
         0x0031: 625,  # PF sys -> 0.625
         0x0032: 1,  # phase sequence -> L1-L2-L3
         0x0033: 500,  # frequency -> 50.0 Hz
+        0x0034: words(123_457, 2),  # kWh (+) TOT, 32-bit copy -> 12345.7 kWh
         # -- tariff energy --
         0x0046: words(12345, 2),  # kWh (+) t1 -> 1234.5 kWh
         0x0048: words(678, 2),  # kWh (+) t2 -> 67.8 kWh

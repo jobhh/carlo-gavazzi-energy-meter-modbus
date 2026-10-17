@@ -9,10 +9,26 @@ from typing import Final
 
 
 class Family(StrEnum):
-    """A meter family. Members of one family share a register map."""
+    """A meter model family."""
 
     EM530 = "EM530"
     EM540 = "EM540"
+    EM330 = "EM330"
+    EM331 = "EM331"
+    EM340 = "EM340"
+    EM341 = "EM341"
+    ET330 = "ET330"
+    ET340 = "ET340"
+
+
+class Series(StrEnum):
+    """A register map, shared by the families in it."""
+
+    EM500 = "EM500"
+    """The EM530 and EM540."""
+
+    EM300 = "EM300"
+    """The EM330, EM340, ET330 and ET340, with their single-tariff variants."""
 
 
 class Variant(StrEnum):
@@ -46,27 +62,38 @@ class MeterModel:
 
     part_number: str
     family: Family
-    variant: Variant
+    variant: Variant | None
+    """The variant, or ``None`` where the code is shared by several variants."""
+
+    series: Series = Series.EM500
 
     @property
     def name(self) -> str:
         """A short display name, such as ``EM540`` or ``EM540 PFC``."""
-        if self.variant is Variant.X:
+        if self.variant is None or self.variant is Variant.X:
             return str(self.family)
         return f"{self.family} {self.variant}"
 
     @property
-    def mid(self) -> bool:
-        """Whether the model is MID certified.
+    def mid(self) -> bool | None:
+        """Whether the model is MID certified, or ``None`` if the code cannot tell.
 
         A MID model keeps its lifetime counters: they cannot be reset.
         """
+        if self.variant is None:
+            return None
         return self.variant is not Variant.X
 
 
 def _model(code: int, part_number: str, variant: Variant) -> tuple[int, MeterModel]:
     family = Family(part_number[:5])
     return code, MeterModel(code, part_number, family, variant)
+
+
+def _em300(code: int, part_number: str) -> tuple[int, MeterModel]:
+    # The EM300 codes are shared by the standard and the MID variants.
+    family = Family(part_number[:5])
+    return code, MeterModel(code, part_number, family, None, Series.EM300)
 
 
 MODELS: Final = MappingProxyType(
@@ -85,10 +112,23 @@ MODELS: Final = MappingProxyType(
             _model(1763, "EM540DINAV23XS1PFC", Variant.PFC),
             _model(1765, "EM540DINAV23XS1PFD", Variant.PFD),
             _model(1766, "EM540DINAV23XS1PFE", Variant.PFE),
+            _em300(331, "EM330DINAV63"),
+            _em300(332, "EM330DINAV53"),
+            _em300(335, "ET330DINAV53"),
+            _em300(336, "ET330DINAV63"),
+            _em300(341, "EM340DINAV23"),
+            _em300(345, "ET340DINAV23"),
+            _em300(346, "EM341DINAV23"),
+            _em300(355, "EM331DINAV53"),
         )
     )
 )
-"""Every known model by identification code, from the protocol document v1.9."""
+"""Every known model by identification code.
+
+The EM500 codes come from the EM530/EM540 protocol v1.9, the EM300 codes from
+the EM300/ET300 protocol v2 revision 17. Code 340, an EM340 engineering
+sample with the opposite word order, is left out on purpose.
+"""
 
 
 def model_for_code(code: int) -> MeterModel | None:

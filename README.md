@@ -2,9 +2,15 @@
 
 Read Carlo Gavazzi energy meters over Modbus, as typed Python objects.
 
-The library covers the EM500 series: the **EM530** and the **EM540**,
-including the MID-certified variants. Victron Energy sells the EM540 as its
-three-phase grid meter, so a Victron EM540 works the same way.
+The library covers two series, including their MID-certified variants:
+
+- the EM500 series, **EM530** and **EM540**, as `EM500Meter`;
+- the EM300/ET300 series, **EM330**, **EM340**, **ET330** and **ET340** (and
+  the single-tariff EM331 and EM341), as `EM300Meter`.
+
+Victron Energy sells the EM540 and the ET340 as its three-phase grid meters,
+so the Victron-branded ones work the same way. `async_detect(unit)` reads the
+model code and returns the right object, already set up.
 
 It is built on
 [modbus-connection](https://github.com/home-assistant-libs/modbus-connection).
@@ -100,6 +106,42 @@ the others still refresh.
 
 The register map follows the *EM530/EM540 Modbus communication protocol*,
 version 1.9 (October 2024).
+
+## The EM300/ET300 series
+
+`EM300Meter` has the same `identity`, `measurements`, `energy`, `demand`,
+`tariff_energy`, `status` and `settings` components. The rest depends on the
+model and on when it was made, so setup probes for it and leaves the
+attribute `None` when the meter refuses it:
+
+| Attribute | Contents | Models |
+| --- | --- | --- |
+| `run_hours` | Run hour meter. | ET330, ET340, EM330 |
+| `exported_per_phase` | Exported energy per phase. | ET330, ET340 |
+| `power_quality` | THD of current and voltage; neutral current on the ET and EM330. | Not every model |
+| `energy_wh` | 64-bit counters in Wh. | EM330 from October 2018 |
+| `energy_precise` | Totals to 1 Wh. | EM340 from October 2018 |
+
+`energy` always holds the 0.1 kWh counters; `best_energy()` returns the
+highest-resolution source the meter has.
+
+Commands: `async_reset_partial_counters()` resets the partial and tariff
+counters and the demand together, `async_reset_total_counters()` the lifetime
+counters (a MID meter refuses it with a Modbus exception; its model code does
+not tell), and `async_reset_run_hours()` the run hours.
+
+Differences from the EM500 series:
+
+- Energy is 32-bit in 0.1 kWh steps, from 0x0034.
+- The phase sequence reads 0 when correct. The protocol gives 1 for a reversed
+  sequence and Victron's driver -1; both decode as `L1_L3_L2`.
+- The measurement mode is A (easy connection) or B (bidirectional).
+- The serial number has one character per register.
+- Code 340, an EM340 engineering sample with the opposite word order, is not
+  supported.
+
+This follows the *EM300 and ET300 series communication protocol*, version 2
+revision 17 (July 2021).
 
 ## Checking a real meter
 

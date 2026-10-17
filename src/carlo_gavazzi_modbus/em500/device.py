@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Final
 from modbus_connection.model import Device, Raw, UpdateReport
 
 from ..exceptions import CommandNotSupportedError, UnsupportedMeterError
-from ..models import Family, MeterModel, model_for_code
+from ..models import MeterModel, Series, model_for_code
 from .demand import Demand
 from .energy import Energy, TariffEnergy
 from .enums import MeasurementMode, MeasuringSystem, Tariff
@@ -20,9 +20,6 @@ from .status import Status
 
 if TYPE_CHECKING:
     from modbus_connection import ModbusUnit
-
-FAMILIES: Final = frozenset({Family.EM530, Family.EM540})
-"""The families that share the EM500 series register map."""
 
 READINGS: Final = (
     "measurements",
@@ -55,7 +52,7 @@ _EXPORT_MODES: Final = frozenset(
 def _supported(code: int | None) -> MeterModel:
     """The model for ``code``, or ``UnsupportedMeterError``."""
     model = model_for_code(code) if code is not None else None
-    if model is None or model.family not in FAMILIES:
+    if model is None or model.series is not Series.EM500:
         raise UnsupportedMeterError(code)
     return model
 

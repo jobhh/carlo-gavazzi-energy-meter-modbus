@@ -7,6 +7,8 @@ right one.
 
 from modbus_connection.model import UpdateReport
 
+from .detect import Meter, async_detect, async_identify, create_meter
+from .em300 import EM300Meter, TariffSource
 from .em500 import (
     DemandInterval,
     DeviceState,
@@ -18,8 +20,6 @@ from .em500 import (
     PhaseSequence,
     Tariff,
 )
-from .detect import Meter, async_detect, async_identify, create_meter
-from .em300 import EM300Meter, TariffSource
 from .exceptions import (
     CarloGavazziError,
     CommandNotSupportedError,

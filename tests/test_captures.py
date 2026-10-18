@@ -19,6 +19,9 @@ from carlo_gavazzi_modbus import EM500Meter, MeasuringSystem
 
 CAPTURES = sorted((Path(__file__).parent / "captures").glob("*.json"))
 
+# What script/query.py writes in place of the meter's serial number.
+REDACTED_SERIAL = "XX0000000000X"
+
 
 def load(unit: MockModbusUnit, capture: dict[str, Any]) -> None:
     """Load a capture into ``unit``.
@@ -31,11 +34,12 @@ def load(unit: MockModbusUnit, capture: dict[str, Any]) -> None:
         space: {int(address): value for address, value in registers.items()}
         for space, registers in capture["raw"].items()
     }
-    # The widest probe also read registers the library does not, such as the
+    # The wide probes also read registers the library does not, such as the
     # 32-bit counter copies. Add them where the poll left a gap.
-    probe = capture.get("probes", {}).get("read_125_registers", {})
-    for offset, word in enumerate(probe.get("words", [])):
-        raw.setdefault("input", {}).setdefault(offset, word)
+    probes = capture.get("probes", {})
+    for name in ("read_125_registers", "read_120_registers"):
+        for offset, word in enumerate(probes.get(name, {}).get("words", [])):
+            raw.setdefault("input", {}).setdefault(offset, word)
     # Function 03h and 04h read the same data on this meter, and it has no
     # coils, so both register stores get every register.
     unit.holding.update({**raw.get("input", {}), **raw.get("holding", {})})
@@ -74,7 +78,16 @@ async def test_capture_decodes_completely(
 
     assert report.complete, report.failed
     assert captured.model is not None
-    assert captured.serial_number
+
+
+@each_capture
+async def test_capture_holds_no_real_serial_number(
+    path: Path, mock_modbus_unit: MockModbusUnit
+) -> None:
+    captured = replay(path, mock_modbus_unit)
+    await captured.async_ensure_setup()
+
+    assert captured.serial_number == REDACTED_SERIAL
 
 
 @each_capture
@@ -136,7 +149,7 @@ async def test_counter_copies_agree(
     unit = captured.modbus_unit
     words = await unit.read_input_registers(0x0034, 2)
     if words == [0, 0]:
-        pytest.skip("the capture holds no 32-bit copy (the 125-register probe failed)")
+        pytest.skip("the capture holds no 32-bit copy (no wide probe succeeded)")
     copy = (words[1] << 16 | words[0]) / 10
 
     assert close(captured.energy.energy_imported, copy, rel=0, abs_=0.1)

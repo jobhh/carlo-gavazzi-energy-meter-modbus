@@ -22,6 +22,7 @@ from modbus_connection.cli_helper import (
     connect_from_args,
     print_component,
 )
+from modbus_connection.model import Raw
 
 from carlo_gavazzi_modbus import EM500Meter
 from carlo_gavazzi_modbus.em500 import ALL
@@ -41,6 +42,32 @@ EXAMPLES = """examples:
 
 Probe = Callable[[ModbusUnit], Awaitable[list[int]]]
 
+# A dump is meant to be shared, so it holds this in place of the serial number.
+# tests/test_captures.py checks that every capture does.
+REDACTED_SERIAL = "XX0000000000X"
+SERIAL_REGISTER = 0x5000
+
+
+def redact_serial(raw: Raw) -> None:
+    """Replace the serial number in ``raw`` with ``REDACTED_SERIAL``.
+
+    The serial fills seven registers, two characters each, high byte first.
+    The low byte of the last register is not part of it and is kept.
+    """
+    encoded = REDACTED_SERIAL.encode("ascii")
+    for registers in raw.values():
+        for offset in range(7):
+            address = SERIAL_REGISTER + offset
+            if address not in registers:
+                continue
+            high = encoded[2 * offset]
+            if 2 * offset + 1 < len(encoded):
+                low = encoded[2 * offset + 1]
+            else:
+                low = int(registers[address]) & 0xFF
+            registers[address] = high << 8 | low
+
+
 # Read-only questions the protocol document leaves open, answered by the meter.
 PROBES: dict[str, tuple[str, Probe]] = {
     "model_code_alone": (
@@ -58,6 +85,10 @@ PROBES: dict[str, tuple[str, Probe]] = {
     "read_125_registers": (
         "0x0000-0x007C in one read: the 125 registers the text allows",
         lambda unit: unit.read_input_registers(0x0000, 125),
+    ),
+    "read_120_registers": (
+        "0x0000-0x0077 in one read: a wide read that ends on a mapped register",
+        lambda unit: unit.read_input_registers(0x0000, 120),
     ),
     "read_64_counter_registers": (
         "0x0500-0x053F in one read: all 64-bit counters and run hours",
@@ -146,6 +177,7 @@ async def main() -> int:
     print(f"Firmware        {meter.firmware_version}")
     print(f"Phases          {meter.phases}, neutral: {meter.has_neutral}")
     print(f"Measures export {meter.measures_export}")
+    print(f"Wide reads      {meter.wide_reads}")
     for name in ALL:
         print()
         print_component(getattr(meter, name), title=name)
@@ -161,10 +193,12 @@ async def main() -> int:
     print(f"\n{setup_reads} reads to set up, {poll_reads} reads per poll")
 
     if args.dump is not None:
+        redact_serial(raw)
         dump = {
             "model": {"code": model.code, "part_number": model.part_number},
             "firmware": meter.firmware_version,
             "unit": args.unit,
+            "wide_reads": meter.wide_reads,
             "raw": raw,
             "probes": probes,
         }

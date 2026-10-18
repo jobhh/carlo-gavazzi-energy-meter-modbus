@@ -99,7 +99,13 @@ the others still refresh.
 - The model code (0x000B) and the firmware version (0x0302) answer only a
   one-register read. The library reads them alone.
 - The protocol document gives two maximum read sizes: 125 registers in the
-  text, and 20 in the request frame tables. The library reads at most 20.
+  text, and 20 in the request frame tables. At setup the library tries one
+  64-register read. If the meter answers, each sub-system is read in as few
+  blocks as possible, so the phase powers and their total come from the same
+  instant. If not, the library reads at most 20 registers at a time.
+  `EM500Meter.wide_reads` tells you which. An EM540 on firmware 1.4.3 answers
+  reads of up to 120 registers, but refuses any read that ends on a register
+  the map marks "n.a.".
 - In measurement mode A, the meter counts every direction as imported, and
   the exported counters stay at zero. `EM500Meter.measures_export` tells you
   which mode is set.

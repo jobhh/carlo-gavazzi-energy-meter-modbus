@@ -5,10 +5,12 @@ from __future__ import annotations
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Final
 
+from modbus_connection import ModbusExceptionError, ModbusTimeoutError
 from modbus_connection.model import Device, Raw, UpdateReport
 
 from ..exceptions import CommandNotSupportedError, UnsupportedMeterError
 from ..models import MeterModel, Series, model_for_code
+from .base import MAX_REGISTERS_PER_READ, WIDE_REGISTERS_PER_READ
 from .demand import Demand
 from .energy import Energy, TariffEnergy
 from .enums import MeasurementMode, MeasuringSystem, Tariff
@@ -44,6 +46,10 @@ _COMMAND_RESET_DEMAND: Final = 0x4005
 _COMMAND_RESET_TARIFFS: Final = 0x4006
 _COMMAND_EXECUTE: Final = 1
 
+# The widest block the readings plan, read once at setup to learn whether the
+# meter accepts reads wider than the documented 20 registers.
+_WIDE_READ_PROBE: Final = 0x0500
+
 _EXPORT_MODES: Final = frozenset(
     {MeasurementMode.PHASE_ACCUMULATION, MeasurementMode.BIDIRECTIONAL}
 )
@@ -75,6 +81,9 @@ class EM500Meter(Device):
     Setup runs on the first poll, or explicitly through
     ``async_ensure_setup()``. It reads the identity and the settings, and
     raises ``UnsupportedMeterError`` if the device is not an EM530 or EM540.
+    It also learns whether the meter accepts wide reads. If it does, each
+    sub-system is read in as few blocks as possible, so values such as the
+    phase powers and their total come from the same instant.
     """
 
     def __init__(self, unit: ModbusUnit) -> None:
@@ -88,12 +97,33 @@ class EM500Meter(Device):
         self.status = Status(unit)
         self.settings = Settings(unit)
         self._model: MeterModel | None = None
+        self._wide_reads = False
 
     async def _async_setup(self) -> None:
         """Read the identity, check the model, and read the settings."""
         await self.identity.async_update()
         self._model = _supported(self.identity.code)
+        self._wide_reads = await self._async_accepts_wide_reads()
+        span = WIDE_REGISTERS_PER_READ if self._wide_reads else MAX_REGISTERS_PER_READ
+        # The readings are first read after setup, so their plans are built
+        # with this width.
+        for name in READINGS:
+            getattr(self, name).max_span = span
         await self.settings.async_update()
+
+    async def _async_accepts_wide_reads(self) -> bool:
+        """Whether the meter answers the widest block the readings plan.
+
+        The protocol document allows 20 registers in its frame tables. A meter
+        that refuses the wider read, or never answers it, is read 20 at a time.
+        """
+        try:
+            await self.modbus_unit.read_input_registers(
+                _WIDE_READ_PROBE, WIDE_REGISTERS_PER_READ
+            )
+        except (ModbusExceptionError, ModbusTimeoutError):
+            return False
+        return True
 
     # -- identity --------------------------------------------------------
 
@@ -106,6 +136,14 @@ class EM500Meter(Device):
     def serial_number(self) -> str | None:
         """The 13-character serial number."""
         return self.identity.serial_number
+
+    @property
+    def wide_reads(self) -> bool:
+        """Whether the meter accepted a wide read at setup.
+
+        If not, the readings are read at most 20 registers at a time.
+        """
+        return self._wide_reads
 
     @property
     def firmware_version(self) -> str | None:

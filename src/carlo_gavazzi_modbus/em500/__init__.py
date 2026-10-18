@@ -1,6 +1,6 @@
 """The EM500 series: the EM530 and EM540 three-phase energy meters."""
 
-from .base import MAX_REGISTERS_PER_READ, EM500Component
+from .base import MAX_REGISTERS_PER_READ, WIDE_REGISTERS_PER_READ, EM500Component
 from .demand import Demand
 from .device import ALL, READINGS, SETTINGS, EM500Meter, async_identify
 from .energy import Energy, TariffEnergy
@@ -25,6 +25,7 @@ __all__ = [
     "MAX_REGISTERS_PER_READ",
     "READINGS",
     "SETTINGS",
+    "WIDE_REGISTERS_PER_READ",
     "Demand",
     "DemandInterval",
     "DeviceState",

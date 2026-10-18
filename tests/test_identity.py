@@ -40,11 +40,12 @@ async def test_setup_reads_single_word_registers_one_at_a_time(
 ) -> None:
     await meter.async_ensure_setup()
 
-    identity_reads = [e for e in em540.read_events if e.register_type == "input"]
-    assert identity_reads == [
+    setup_reads = [e for e in em540.read_events if e.register_type == "input"]
+    assert setup_reads == [
         ReadEvent("input", 0x000B, 1),
         ReadEvent("input", 0x0302, 1),
         ReadEvent("input", 0x5000, 8),
+        ReadEvent("input", 0x0500, 64),  # the wide-read probe
     ]
 
 

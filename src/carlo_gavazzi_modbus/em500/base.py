@@ -16,7 +16,16 @@ MAX_REGISTERS_PER_READ: Final = 20
 
 The protocol document states two limits: 125 registers in the text and
 1 to 20 (``14h``) in the request frame tables. Reads stay within the stricter
-one until it is known which one the firmware enforces.
+one unless the meter answers ``WIDE_REGISTERS_PER_READ`` at setup.
+"""
+
+WIDE_REGISTERS_PER_READ: Final = 64
+"""The widest read the readings plan when the meter accepts wide reads.
+
+64 registers is the widest block the readings need: the 64-bit counters and
+run hours at 0x0500-0x053F. An EM540 on firmware 1.4.3 answers reads of up to
+120 registers, but refuses with an illegal data address any read that ends on
+a register the map marks "n.a.". The planned blocks always end on a field.
 """
 
 OVERFLOW_MSW: Final = 0x7FFF

@@ -71,7 +71,7 @@ wheels = [
 ]
 
 [[package]]
-name = "carlo-gavazzi-modbus"
+name = "carlo-gavazzi-energy-meter-modbus"
 version = "0.0.0"
 source = { editable = "." }
 dependencies = [

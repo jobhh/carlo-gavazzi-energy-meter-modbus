@@ -1,6 +1,6 @@
-# Releasing `carlo-gavazzi-modbus`
+# Releasing `carlo-gavazzi-energy-meter-modbus`
 
-This document describes how to release a new version of `carlo-gavazzi-modbus` to PyPI.
+This document describes how to release a new version of `carlo-gavazzi-energy-meter-modbus` to PyPI.
 
 ## Tagging Convention
 
@@ -30,9 +30,9 @@ this repository first:
 
 1. Sign in to [PyPI](https://pypi.org) and open **Your projects** → **Publishing**.
 2. Under **Add a new pending publisher**, choose **GitHub** and fill in:
-   - **PyPI project name**: `carlo-gavazzi-modbus`
+   - **PyPI project name**: `carlo-gavazzi-energy-meter-modbus`
    - **Owner**: `jobhh`
-   - **Repository name**: `carlo-gavazzi-modbus`
+   - **Repository name**: `carlo-gavazzi-energy-meter-modbus`
    - **Workflow name**: `publish.yml`
    - **Environment name**: `pypi`
 3. In this repository on GitHub, open **Settings** → **Environments** and create

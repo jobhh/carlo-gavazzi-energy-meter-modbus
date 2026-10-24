@@ -5,7 +5,11 @@ from __future__ import annotations
 import pytest
 from modbus_connection.mock import MockModbusUnit, WriteEvent
 
-from carlo_gavazzi_modbus import CommandNotSupportedError, EM500Meter, Tariff
+from carlo_gavazzi_energy_meter_modbus import (
+    CommandNotSupportedError,
+    EM500Meter,
+    Tariff,
+)
 
 from .conftest import seed
 

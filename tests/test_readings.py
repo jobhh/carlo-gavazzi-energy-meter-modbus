@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from modbus_connection.mock import MockModbusUnit
 
-from carlo_gavazzi_modbus import (
+from carlo_gavazzi_energy_meter_modbus import (
     DemandInterval,
     DeviceState,
     DigitalInputFunction,

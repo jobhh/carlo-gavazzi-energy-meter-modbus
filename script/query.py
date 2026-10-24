@@ -24,8 +24,8 @@ from modbus_connection.cli_helper import (
 )
 from modbus_connection.model import Raw
 
-from carlo_gavazzi_modbus import EM500Meter
-from carlo_gavazzi_modbus.em500 import ALL
+from carlo_gavazzi_energy_meter_modbus import EM500Meter
+from carlo_gavazzi_energy_meter_modbus.em500 import ALL
 
 # The meter speaks RTU on its RS485 port: a serial port, an ESPHome serial
 # proxy (esphome://), or a gateway that passes the frames through (tcp + rtu).

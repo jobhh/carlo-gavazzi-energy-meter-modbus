@@ -10,7 +10,7 @@ from modbus_connection import (
 )
 from modbus_connection.mock import MockModbusUnit
 
-from carlo_gavazzi_modbus import EM500Meter
+from carlo_gavazzi_energy_meter_modbus import EM500Meter
 
 
 async def test_a_refused_sub_system_leaves_the_others_updated(

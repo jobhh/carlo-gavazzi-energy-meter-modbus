@@ -12,8 +12,11 @@ from modbus_connection import (
 )
 from modbus_connection.mock import MockModbusUnit, ReadEvent
 
-from carlo_gavazzi_modbus import EM500Meter
-from carlo_gavazzi_modbus.em500 import MAX_REGISTERS_PER_READ, WIDE_REGISTERS_PER_READ
+from carlo_gavazzi_energy_meter_modbus import EM500Meter
+from carlo_gavazzi_energy_meter_modbus.em500 import (
+    MAX_REGISTERS_PER_READ,
+    WIDE_REGISTERS_PER_READ,
+)
 
 # The addresses the EM540 (AV2) documents, from the protocol document v1.9.
 # A read outside them is answered with an illegal data address. Function 03h

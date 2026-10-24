@@ -6,7 +6,7 @@ import pytest
 from modbus_connection import IllegalDataAddressError
 from modbus_connection.mock import MockModbusUnit, ReadEvent
 
-from carlo_gavazzi_modbus import (
+from carlo_gavazzi_energy_meter_modbus import (
     MODELS,
     EM500Meter,
     Family,

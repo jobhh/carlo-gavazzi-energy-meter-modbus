@@ -1,4 +1,4 @@
-# carlo-gavazzi-modbus
+# carlo-gavazzi-energy-meter-modbus
 
 Read Carlo Gavazzi energy meters over Modbus, as typed Python objects.
 
@@ -22,7 +22,7 @@ gateway, or the in-memory mock in tests.
 ## Install
 
 ```bash
-pip install carlo-gavazzi-modbus
+pip install carlo-gavazzi-energy-meter-modbus
 ```
 
 ## Example
@@ -33,7 +33,7 @@ import asyncio
 from modbus_connection import ModbusTcpParams
 from modbus_connection.tmodbus import ModbusConnection
 
-from carlo_gavazzi_modbus import EM500Meter
+from carlo_gavazzi_energy_meter_modbus import EM500Meter
 
 
 async def main() -> None:

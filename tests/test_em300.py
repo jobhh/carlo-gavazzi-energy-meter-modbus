@@ -6,7 +6,7 @@ import pytest
 from modbus_connection import IllegalDataAddressError
 from modbus_connection.mock import MockModbusUnit, ReadEvent, WriteEvent
 
-from carlo_gavazzi_modbus import (
+from carlo_gavazzi_energy_meter_modbus import (
     CommandNotSupportedError,
     EM300Meter,
     EM500Meter,
@@ -18,7 +18,7 @@ from carlo_gavazzi_modbus import (
     UnsupportedMeterError,
     async_detect,
 )
-from carlo_gavazzi_modbus.em300 import MeasurementMode
+from carlo_gavazzi_energy_meter_modbus.em300 import MeasurementMode
 
 from .conftest import flatten, int16, words
 

@@ -12,7 +12,7 @@ from collections.abc import Mapping
 import pytest
 from modbus_connection.mock import MockModbusUnit
 
-from carlo_gavazzi_modbus import EM500Meter
+from carlo_gavazzi_energy_meter_modbus import EM500Meter
 
 
 def words(value: int, count: int) -> list[int]:

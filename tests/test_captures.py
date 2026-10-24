@@ -15,7 +15,7 @@ from typing import Any
 import pytest
 from modbus_connection.mock import MockModbusUnit
 
-from carlo_gavazzi_modbus import EM500Meter, MeasuringSystem
+from carlo_gavazzi_energy_meter_modbus import EM500Meter, MeasuringSystem
 
 CAPTURES = sorted((Path(__file__).parent / "captures").glob("*.json"))
 

@@ -3,13 +3,13 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "carlo-gavazzi-modbus"
+name = "carlo-gavazzi-energy-meter-modbus"
 version = "0.0.0"
 description = "Read Carlo Gavazzi energy meters (EM530, EM540) over Modbus."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }
-authors = [{ name = "carlo-gavazzi-modbus contributors" }]
+authors = [{ name = "carlo-gavazzi-energy-meter-modbus contributors" }]
 keywords = [
     "modbus",
     "carlo-gavazzi",
@@ -29,8 +29,8 @@ classifiers = [
 dependencies = ["modbus-connection[tmodbus]>=4.12.1"]
 
 [project.urls]
-Homepage = "https://github.com/jobhh/carlo-gavazzi-modbus"
-Issues = "https://github.com/jobhh/carlo-gavazzi-modbus/issues"
+Homepage = "https://github.com/jobhh/carlo-gavazzi-energy-meter-modbus"
+Issues = "https://github.com/jobhh/carlo-gavazzi-energy-meter-modbus/issues"
 
 [dependency-groups]
 dev = [
@@ -41,7 +41,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/carlo_gavazzi_modbus"]
+packages = ["src/carlo_gavazzi_energy_meter_modbus"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

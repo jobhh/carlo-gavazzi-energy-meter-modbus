@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "carlo-gavazzi-energy-meter-modbus"
 version = "0.0.0"
-description = "Read Carlo Gavazzi energy meters (EM530, EM540) over Modbus."
+description = "Read Carlo Gavazzi energy meters (EM530, EM540, EM330, EM340, ET330, ET340) over Modbus."
 readme = "README.md"
 requires-python = ">=3.12"
 license = { text = "Apache-2.0" }

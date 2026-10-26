@@ -141,16 +141,13 @@ class RunHours(EM300Component):
 
 
 class PowerQuality(EM300Component):
-    """THD and neutral current (0x0082-0x0099). Not every model serves them."""
+    """The neutral current (0x0098). ET models and the EM330 only.
 
-    thd_current_l1 = measured(0x0082, 0.01, "%")
-    thd_current_l2 = measured(0x0084, 0.01, "%")
-    thd_current_l3 = measured(0x0086, 0.01, "%")
-    thd_voltage_l1_n = measured(0x008A, 0.01, "%")
-    thd_voltage_l2_n = measured(0x008C, 0.01, "%")
-    thd_voltage_l3_n = measured(0x008E, 0.01, "%")
+    The THD registers before it (0x0082-0x0097) are in the map, but the
+    protocol document marks them "not available": they read 0 on every model.
+    """
+
     neutral_current = measured(0x0098, 0.001, "A")
-    """ET models and the EM330 only."""
 
 
 class EnergyWh(EM300Component):

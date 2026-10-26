@@ -124,7 +124,7 @@ attribute `None` when the meter refuses it:
 | --- | --- | --- |
 | `run_hours` | Run hour meter. | ET330, ET340, EM330 |
 | `exported_per_phase` | Exported energy per phase. | ET330, ET340 |
-| `power_quality` | THD of current and voltage; neutral current on the ET and EM330. | Not every model |
+| `power_quality` | Neutral current. The THD registers read 0 on every model, so they are left out. | ET and EM330 |
 | `energy_wh` | 64-bit counters in Wh. | EM330 from October 2018 |
 | `energy_precise` | Totals to 1 Wh. | EM340 from October 2018 |
 

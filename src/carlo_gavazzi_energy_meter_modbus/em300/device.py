@@ -100,13 +100,8 @@ class EM300Meter(Device):
             self.energy_wh = await read_optional(EnergyWh(unit))
         if model.family in _EM340:
             self.energy_precise = await read_optional(EnergyPrecise(unit))
-        power_quality = PowerQuality(unit)
-        if model.family not in _ET | _EM330:
-            # The neutral current is ET and EM330 only.
-            power_quality.restrict_fields(
-                [n for n in PowerQuality.declared_fields if n != "neutral_current"]
-            )
-        self.power_quality = await read_optional(power_quality)
+        if model.family in _ET | _EM330:
+            self.power_quality = await read_optional(PowerQuality(unit))
         self._model = model
 
     @property

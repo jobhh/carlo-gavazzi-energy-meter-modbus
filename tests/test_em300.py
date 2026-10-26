@@ -71,7 +71,6 @@ ET_INPUT: dict[int, int] = flatten(
         0x0060: words(1_000, 2),  # kWh (-) L1 -> 100.0 kWh
         0x0062: words(2_000, 2),  # kWh (-) L2 -> 200.0 kWh
         0x0064: words(3_000, 2),  # kWh (-) L3 -> 300.0 kWh
-        0x0082: words(312, 2),  # THD A L1 -> 3.12 %
         0x0098: words(123, 2),  # An -> 0.123 A
     }
 )
@@ -86,7 +85,6 @@ EM330_INPUT: dict[int, int] = flatten(
 
 EM340_INPUT: dict[int, int] = flatten(
     {
-        0x0082: words(312, 2),  # THD A L1 -> 3.12 %
         0x0400: words(12345, 2),  # kWh (+) TOT, integer part
         0x0402: words(678, 2),  # kWh (+) TOT, thousandths -> 12345.678 kWh
         0x0408: words(2500, 2),  # kWh (-) TOT, integer part
@@ -176,9 +174,8 @@ async def test_em340_reads_and_optional_blocks(em340: MockModbusUnit) -> None:
     assert meter.energy_precise.energy_imported == 12345.678
     assert meter.energy_precise.energy_exported == 2500.123
     assert meter.best_energy() is meter.energy_precise
-    assert meter.power_quality is not None
-    assert meter.power_quality.thd_current_l1 == pytest.approx(3.12)
-    assert meter.power_quality.neutral_current is None
+    # The EM340 has no neutral current, and the THD registers only read 0.
+    assert meter.power_quality is None
 
 
 async def test_et340_serves_run_hours_and_export_per_phase(
@@ -229,8 +226,8 @@ async def test_optional_blocks_are_only_probed_for_models_that_may_have_them(
 
     probed = {e.address for e in em340.read_events if e.register_type == "input"}
     assert 0x0400 in probed
-    assert 0x0082 in probed
-    assert probed.isdisjoint({0x005A, 0x0060, 0x0500})
+    # Neither the neutral current nor the THD registers, which only read 0.
+    assert probed.isdisjoint({0x005A, 0x0060, 0x0082, 0x0098, 0x0500})
 
 
 async def test_identity_reads(em340: MockModbusUnit) -> None:

@@ -81,6 +81,17 @@ resolution.
 `UpdateReport`: a sub-system the meter refuses lands in `report.failed`, and
 the others still refresh.
 
+## Reading less, and diagnostics
+
+Both series offer the same helpers, once the meter is set up:
+
+| Method | Effect |
+| --- | --- |
+| `source(field)` | The sub-system that serves `field` on this meter, such as `"energy_wh"` for `energy_imported` on an EM330, or `None`. Where several serve it, the finest counters win. |
+| `restrict_reads({subsystem: fields})` | Reads only those fields from then on, where that saves reads. A sub-system read as one block stays whole. |
+| `values(names=None)` | What each sub-system last read, decoded, by field name; `None` for one the meter does not serve. |
+| `async_read_snapshot()` | Reads every sub-system whole into a `Snapshot` of decoded `values` and `raw` registers. The raw registers leave the serial number out; the decoded identity still has it. |
+
 ## Commands
 
 | Method | Effect |

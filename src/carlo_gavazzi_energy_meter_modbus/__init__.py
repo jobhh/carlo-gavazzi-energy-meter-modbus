@@ -25,6 +25,7 @@ from .exceptions import (
     CommandNotSupportedError,
     UnsupportedMeterError,
 )
+from .meter import Snapshot, component_values
 from .models import MODELS, Family, MeterModel, Series, Variant, model_for_code
 
 __all__ = [
@@ -44,6 +45,7 @@ __all__ = [
     "MeterModel",
     "PhaseSequence",
     "Series",
+    "Snapshot",
     "Tariff",
     "TariffSource",
     "UnsupportedMeterError",
@@ -51,6 +53,7 @@ __all__ = [
     "Variant",
     "async_detect",
     "async_identify",
+    "component_values",
     "create_meter",
     "model_for_code",
 ]

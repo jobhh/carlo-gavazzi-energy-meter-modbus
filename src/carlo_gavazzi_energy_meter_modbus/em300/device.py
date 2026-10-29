@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, ClassVar, Final
 
-from modbus_connection.model import Device, Raw, UpdateReport, read_optional
+from modbus_connection.model import Raw, UpdateReport, read_optional
 
 from ..em500.enums import MeasuringSystem, Tariff
 from ..exceptions import CommandNotSupportedError, UnsupportedMeterError
+from ..meter import MeterBase
 from ..models import Family, MeterModel, Series, model_for_code
 from .components import (
     Demand,
@@ -58,13 +59,22 @@ _EM330: Final = frozenset({Family.EM330, Family.EM331})
 _EM340: Final = frozenset({Family.EM340, Family.EM341})
 
 
-class EM300Meter(Device):
+class EM300Meter(MeterBase):
     """An EM330, EM340, ET330 or ET340 reached through a ``ModbusUnit``.
 
     Setup identifies the model, reads the settings, and probes the blocks only
     some models and production years serve: run hours, power quality,
     per-phase export, and the higher-resolution energy counters.
     """
+
+    # The energy counters at the finest resolution come first.
+    SOURCES: ClassVar[tuple[str, ...]] = (
+        "identity",
+        "energy_wh",
+        "energy_precise",
+        *(name for name in READINGS if name not in ("energy_wh", "energy_precise")),
+        *SETTINGS,
+    )
 
     def __init__(self, unit: ModbusUnit) -> None:
         super().__init__(unit)

@@ -3,12 +3,13 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, ClassVar, Final
 
 from modbus_connection import ModbusExceptionError, ModbusTimeoutError
-from modbus_connection.model import Device, Raw, UpdateReport
+from modbus_connection.model import Raw, UpdateReport
 
 from ..exceptions import CommandNotSupportedError, UnsupportedMeterError
+from ..meter import MeterBase
 from ..models import MeterModel, Series, model_for_code
 from .base import MAX_REGISTERS_PER_READ, WIDE_REGISTERS_PER_READ
 from .demand import Demand
@@ -75,7 +76,7 @@ async def async_identify(unit: ModbusUnit) -> MeterModel:
     return _supported(code)
 
 
-class EM500Meter(Device):
+class EM500Meter(MeterBase):
     """An EM530 or EM540 reached through a ``ModbusUnit``.
 
     Setup runs on the first poll, or explicitly through
@@ -85,6 +86,8 @@ class EM500Meter(Device):
     sub-system is read in as few blocks as possible, so values such as the
     phase powers and their total come from the same instant.
     """
+
+    SOURCES: ClassVar[tuple[str, ...]] = ALL
 
     def __init__(self, unit: ModbusUnit) -> None:
         super().__init__(unit)
